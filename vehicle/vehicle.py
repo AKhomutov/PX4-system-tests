@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from utils.wait import wait_until
 from vehicle.actions import VehicleActions
+from vehicle.mission import VehicleMission
 from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
 
@@ -12,10 +13,12 @@ class Vehicle:
         actions: VehicleActions,
         telemetry: TelemetryMonitor,
         parameters: VehicleParameters,
+        mission: VehicleMission,
     ) -> None:
         self.actions = actions
         self.telemetry = telemetry
         self.parameters = parameters
+        self.mission = mission
 
     def arm(self) -> None:
         self.actions.arm()
@@ -71,6 +74,45 @@ class Vehicle:
                 f"Vehicle remained armed for more than {timeout_s}s"
             ) from e
 
+    def wait_for_mission_finished(self, timeout_s: float = 60.0) -> None:
+        wait_until(
+            self.mission.is_finished,
+            timeout_s,
+            "mission finished",
+        )
+
+    def verify_mission_finished(self, timeout_s: float = 60.0) -> None:
+        try:
+            self.wait_for_mission_finished(timeout_s=timeout_s)
+        except TimeoutError as e:
+            raise AssertionError(
+                f"Mission was not finished within {timeout_s}s "
+                f"(progress: {self.mission.get_progress_fraction():.2f}, "
+                f"item {self.mission.get_current_item_index()}/"
+                f"{self.mission.get_total_items_count()})"
+            ) from e
+
+    def verify_mission_progress_at_least(
+        self,
+        expected_fraction: float,
+        timeout_s: float = 30.0,
+    ) -> None:
+        if not 0.0 <= expected_fraction <= 1.0:
+            raise ValueError("expected_fraction must be between 0.0 and 1.0")
+
+        try:
+            wait_until(
+                lambda: self.mission.get_progress_fraction() >= expected_fraction,
+                timeout_s,
+                f"mission progress >= {expected_fraction:.2f}",
+            )
+        except TimeoutError as e:
+            raise AssertionError(
+                f"Mission progress did not reach {expected_fraction:.2f} "
+                f"within {timeout_s}s "
+                f"(current: {self.mission.get_progress_fraction():.2f})"
+            ) from e
+
     def recover_to_safe_state(
         self,
         *,
@@ -101,6 +143,24 @@ class Vehicle:
                 disarm_timeout_s,
                 "disarm during recovery",
             )
+
+    def reset_test_state(self) -> None:
+        errors: list[Exception] = []
+
+        try:
+            self.recover_to_safe_state()
+        except Exception as error:
+            errors.append(error)
+
+        try:
+            self.mission.clear()
+        except Exception as error:
+            errors.append(error)
+
+        if len(errors) == 1:
+            raise errors[0]
+        if errors:
+            raise ExceptionGroup("Failed to reset vehicle test state", errors)
 
     def _is_on_ground(self) -> bool:
         return self.telemetry.is_on_ground()

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
+
 from mavsdk import System
 from mavsdk.plugins.param import Param, ParamError, ParamResult
 
@@ -36,10 +39,19 @@ class VehicleParameters:
                 raise
             return self.get_float(name)
 
-    def restore(self, name: str, value: int | float) -> None:
+    def set_value(self, name: str, value: int | float) -> None:
         if isinstance(value, bool):
             raise TypeError(f"Unsupported param value type for {name!r}: bool")
         if isinstance(value, int):
             self.set_int(name, value)
         else:
             self.set_float(name, value)
+
+    @contextmanager
+    def temporary_value(self, name: str, value: int | float) -> Iterator[None]:
+        old_value = self.get_value(name)
+        self.set_value(name, value)
+        try:
+            yield
+        finally:
+            self.set_value(name, old_value)

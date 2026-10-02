@@ -7,6 +7,7 @@ import pytest
 
 from vehicle.actions import VehicleActions
 from vehicle.client import VehicleClient
+from vehicle.mission import VehicleMission
 from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
 from vehicle.vehicle import Vehicle
@@ -28,21 +29,32 @@ def vehicle(request: pytest.FixtureRequest) -> Iterator[Vehicle]:
     telemetry = TelemetryMonitor(drone)
     actions = VehicleActions(drone)
     parameters = VehicleParameters(drone)
-    connected_vehicle = Vehicle(actions, telemetry, parameters)
+    mission = VehicleMission(drone)
+    connected_vehicle = Vehicle(actions, telemetry, parameters, mission)
 
     telemetry.start()
-    recovery_error: Exception | None = None
+    cleanup_errors: list[Exception] = []
     try:
         yield connected_vehicle
     finally:
         try:
-            connected_vehicle.recover_to_safe_state()
+            connected_vehicle.reset_test_state()
         except Exception as error:
-            recovery_error = error
-            print(f"Warn: failed to recover vehicle to safe state: {error}")
-        telemetry.stop()
+            cleanup_errors.append(error)
+            print(f"Warn: failed to reset vehicle test state: {error}")
+
+        try:
+            telemetry.stop()
+        except Exception as error:
+            cleanup_errors.append(error)
+            print(f"Warn: failed to stop telemetry: {error}")
 
         call_report = getattr(request.node, "rep_call", None)
         test_failed = call_report is not None and call_report.failed
-        if recovery_error is not None and not test_failed:
-            raise recovery_error
+        if cleanup_errors and not test_failed:
+            if len(cleanup_errors) == 1:
+                raise cleanup_errors[0]
+            raise ExceptionGroup(
+                "Failed to clean up vehicle fixture",
+                cleanup_errors,
+            )
