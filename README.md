@@ -116,6 +116,9 @@ The NVIDIA version requires Docker with NVIDIA Container Toolkit configured.
 
 The scripts start PX4 SITL with the Gazebo `gz_x500` model and use host networking so MAVSDK can connect over UDP.
 
+> **Note:** The launcher scripts are configured and tested with X11 display forwarding.  
+> Wayland setups may require different GUI forwarding configuration.
+
 ### QGroundControl
 
 Download the Linux AppImage from the official QGroundControl release page.
