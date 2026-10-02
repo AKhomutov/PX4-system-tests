@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from utils.wait import wait_until
 from vehicle.actions import VehicleActions
+from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
 
 
@@ -10,21 +11,23 @@ class Vehicle:
         self,
         actions: VehicleActions,
         telemetry: TelemetryMonitor,
+        parameters: VehicleParameters,
     ) -> None:
-        self._actions = actions
-        self._telemetry = telemetry
+        self.actions = actions
+        self.telemetry = telemetry
+        self.parameters = parameters
 
     def arm(self) -> None:
-        self._actions.arm()
+        self.actions.arm()
 
     def take_off(self) -> None:
-        self._actions.takeoff()
+        self.actions.takeoff()
 
     def land(self) -> None:
-        self._actions.land()
+        self.actions.land()
 
     def disarm(self) -> None:
-        self._actions.disarm()
+        self.actions.disarm()
 
     def wait_for_position(self, timeout_s: float = 10.0) -> None:
         wait_until(
@@ -40,12 +43,12 @@ class Vehicle:
     ) -> None:
         try:
             wait_until(
-                lambda: self._telemetry.get_max_relative_altitude_m() > altitude_m,
+                lambda: self.telemetry.get_max_relative_altitude_m() > altitude_m,
                 timeout_s,
                 f"altitude > {altitude_m} m",
             )
         except TimeoutError as e:
-            max_altitude_m = self._telemetry.get_max_relative_altitude_m()
+            max_altitude_m = self.telemetry.get_max_relative_altitude_m()
             raise AssertionError(
                 f"Altitude {altitude_m} m was not reached "
                 f"within {timeout_s}s "
@@ -100,10 +103,10 @@ class Vehicle:
             )
 
     def _is_on_ground(self) -> bool:
-        return self._telemetry.is_on_ground()
+        return self.telemetry.is_on_ground()
 
     def _is_armed(self) -> bool:
-        return self._telemetry.is_armed()
+        return self.telemetry.is_armed()
 
     def _has_position(self) -> bool:
-        return self._telemetry.has_position()
+        return self.telemetry.has_position()

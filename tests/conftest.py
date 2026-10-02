@@ -6,6 +6,7 @@ import pytest
 
 from vehicle.actions import VehicleActions
 from vehicle.client import VehicleClient
+from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
 from vehicle.vehicle import Vehicle
 
@@ -18,7 +19,8 @@ def vehicle() -> Iterator[Vehicle]:
 
     telemetry = TelemetryMonitor(drone)
     actions = VehicleActions(drone)
-    connected_vehicle = Vehicle(actions, telemetry)
+    parameters = VehicleParameters(drone)
+    connected_vehicle = Vehicle(actions, telemetry, parameters)
 
     telemetry.start()
     recovery_error: Exception | None = None
