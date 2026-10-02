@@ -3,6 +3,7 @@ from __future__ import annotations
 from utils.wait import wait_until
 from vehicle.actions import VehicleActions
 from vehicle.failures import VehicleFailures
+from vehicle.info import VehicleInfo
 from vehicle.mission import VehicleMission
 from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
@@ -16,12 +17,14 @@ class Vehicle:
         parameters: VehicleParameters,
         mission: VehicleMission,
         failures: VehicleFailures,
+        info: VehicleInfo,
     ) -> None:
         self.actions = actions
         self.telemetry = telemetry
         self.parameters = parameters
         self.mission = mission
         self.failures = failures
+        self.info = info
 
     def arm(self) -> None:
         self.actions.arm()
