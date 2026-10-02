@@ -100,17 +100,46 @@ The pytest fixture tries to leave PX4 in a clean state after every test:
 
 This also runs when a test fails.
 
-## Running
+## Local setup
+
+### PX4 SITL + Gazebo
+
+Launcher scripts are available in `scripts/`:
+
+```bash
+./scripts/run_px4_sitl_nvidia.sh
+./scripts/run_px4_sitl_amd.sh
+./scripts/run_px4_sitl_cpu.sh
+```
+
+The NVIDIA version requires Docker with NVIDIA Container Toolkit configured.
+
+The scripts start PX4 SITL with the Gazebo `gz_x500` model and use host networking so MAVSDK can connect over UDP.
+
+### QGroundControl
+
+Download the Linux AppImage from the official QGroundControl release page.
+
+Make it executable and run it:
+
+```bash
+chmod +x QGroundControl.AppImage
+./QGroundControl.AppImage
+```
+
+QGroundControl is optional for automated tests, but useful for monitoring the simulated vehicle and manual inspection.
+
+### Python environment
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
 ```
 
-Start PX4 SITL with MAVLink available on UDP port `14540`, then run:
+Then install the project dependencies and run:
 
 ```bash
+pip install -e ".[dev]"
 pytest -v
 ```
 
