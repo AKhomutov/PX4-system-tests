@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from utils.wait import wait_until
 from vehicle.actions import VehicleActions
+from vehicle.failures import VehicleFailures
 from vehicle.mission import VehicleMission
 from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
@@ -14,11 +15,13 @@ class Vehicle:
         telemetry: TelemetryMonitor,
         parameters: VehicleParameters,
         mission: VehicleMission,
+        failures: VehicleFailures,
     ) -> None:
         self.actions = actions
         self.telemetry = telemetry
         self.parameters = parameters
         self.mission = mission
+        self.failures = failures
 
     def arm(self) -> None:
         self.actions.arm()
@@ -146,6 +149,11 @@ class Vehicle:
 
     def reset_test_state(self) -> None:
         errors: list[Exception] = []
+
+        try:
+            self.failures.restore_all()
+        except Exception as error:
+            errors.append(error)
 
         try:
             self.recover_to_safe_state()

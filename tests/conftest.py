@@ -7,6 +7,7 @@ import pytest
 
 from vehicle.actions import VehicleActions
 from vehicle.client import VehicleClient
+from vehicle.failures import VehicleFailures
 from vehicle.mission import VehicleMission
 from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
@@ -30,7 +31,8 @@ def vehicle(request: pytest.FixtureRequest) -> Iterator[Vehicle]:
     actions = VehicleActions(drone)
     parameters = VehicleParameters(drone)
     mission = VehicleMission(drone)
-    connected_vehicle = Vehicle(actions, telemetry, parameters, mission)
+    failures = VehicleFailures(drone)
+    connected_vehicle = Vehicle(actions, telemetry, parameters, mission, failures)
 
     telemetry.start()
     cleanup_errors: list[Exception] = []
