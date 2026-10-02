@@ -2,28 +2,20 @@ from __future__ import annotations
 
 import pytest
 
-from scenarios.takeoff import TakeoffTest
-from tests.support import VehicleDependencies
+from vehicle.vehicle import Vehicle
 
 
-def test_takeoff_reaches_expected_altitude(
-    vehicle_dependencies: VehicleDependencies,
-) -> None:
-    TakeoffTest(
-        vehicle_dependencies.telemetry,
-        vehicle_dependencies.actions,
-        target_altitude_m=2.0,
-        timeout_s=10.0,
-    ).run()
+def test_takeoff_reaches_expected_altitude(vehicle: Vehicle) -> None:
+    vehicle.wait_for_position()
+    vehicle.arm()
+    vehicle.take_off()
+    vehicle.verify_altitude_is_above(2.0)
 
 
-def test_takeoff_fails_when_expected_altitude_is_too_high(
-    vehicle_dependencies: VehicleDependencies,
-) -> None:
-    with pytest.raises(AssertionError, match=r"Takeoff altitude 5\.0 m was not reached"):
-        TakeoffTest(
-            vehicle_dependencies.telemetry,
-            vehicle_dependencies.actions,
-            target_altitude_m=5.0,
-            timeout_s=10.0,
-        ).run()
+def test_takeoff_fails_when_expected_altitude_is_too_high(vehicle: Vehicle) -> None:
+    vehicle.wait_for_position()
+    vehicle.arm()
+    vehicle.take_off()
+
+    with pytest.raises(AssertionError, match=r"Altitude 5\.0 m was not reached"):
+        vehicle.verify_altitude_is_above(5.0)
