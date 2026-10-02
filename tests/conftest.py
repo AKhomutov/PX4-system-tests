@@ -21,11 +21,15 @@ def vehicle() -> Iterator[Vehicle]:
     connected_vehicle = Vehicle(actions, telemetry)
 
     telemetry.start()
+    recovery_error: Exception | None = None
     try:
         yield connected_vehicle
     finally:
         try:
             connected_vehicle.recover_to_safe_state()
-        except Exception as recovery_error:
-            print(f"Warn: failed to recover vehicle to safe state: {recovery_error}")
+        except Exception as error:
+            recovery_error = error
+            print(f"Warn: failed to recover vehicle to safe state: {error}")
         telemetry.stop()
+        if recovery_error is not None:
+            raise recovery_error

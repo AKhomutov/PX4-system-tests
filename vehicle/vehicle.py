@@ -26,18 +26,9 @@ class Vehicle:
     def disarm(self) -> None:
         self._actions.disarm()
 
-    def is_on_ground(self) -> bool:
-        return self._telemetry.is_on_ground()
-
-    def is_armed(self) -> bool:
-        return self._telemetry.is_armed()
-
-    def has_position(self) -> bool:
-        return self._telemetry.has_position()
-
     def wait_for_position(self, timeout_s: float = 10.0) -> None:
         wait_until(
-            self.has_position,
+            self._has_position,
             timeout_s,
             "first position telemetry",
         )
@@ -63,7 +54,7 @@ class Vehicle:
 
     def verify_is_on_ground(self, timeout_s: float = 30.0) -> None:
         try:
-            wait_until(self.is_on_ground, timeout_s, "landing (ON_GROUND)")
+            wait_until(self._is_on_ground, timeout_s, "landing (ON_GROUND)")
         except TimeoutError as e:
             raise AssertionError(
                 f"Vehicle did not reach ON_GROUND within {timeout_s}s"
@@ -71,7 +62,7 @@ class Vehicle:
 
     def verify_is_disarmed(self, timeout_s: float = 10.0) -> None:
         try:
-            wait_until(lambda: not self.is_armed(), timeout_s, "disarmed")
+            wait_until(lambda: not self._is_armed(), timeout_s, "disarmed")
         except TimeoutError as e:
             raise AssertionError(
                 f"Vehicle remained armed for more than {timeout_s}s"
@@ -83,11 +74,11 @@ class Vehicle:
         landing_timeout_s: float = 30.0,
         disarm_timeout_s: float = 10.0,
     ) -> None:
-        if self.is_on_ground():
-            if self.is_armed():
+        if self._is_on_ground():
+            if self._is_armed():
                 self.disarm()
                 wait_until(
-                    lambda: not self.is_armed(),
+                    lambda: not self._is_armed(),
                     disarm_timeout_s,
                     "disarm during recovery",
                 )
@@ -95,15 +86,24 @@ class Vehicle:
 
         self.land()
         wait_until(
-            self.is_on_ground,
+            self._is_on_ground,
             landing_timeout_s,
             "landing during recovery",
         )
 
-        if self.is_armed():
+        if self._is_armed():
             self.disarm()
             wait_until(
-                lambda: not self.is_armed(),
+                lambda: not self._is_armed(),
                 disarm_timeout_s,
                 "disarm during recovery",
             )
+
+    def _is_on_ground(self) -> bool:
+        return self._telemetry.is_on_ground()
+
+    def _is_armed(self) -> bool:
+        return self._telemetry.is_armed()
+
+    def _has_position(self) -> bool:
+        return self._telemetry.has_position()
