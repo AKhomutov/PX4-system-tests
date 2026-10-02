@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from mavsdk.plugins.telemetry import FlightMode
+
 from utils.wait import wait_until
 from vehicle.actions import VehicleActions
 from vehicle.failures import VehicleFailures
@@ -78,6 +80,24 @@ class Vehicle:
         except TimeoutError as e:
             raise AssertionError(
                 f"Vehicle remained armed for more than {timeout_s}s"
+            ) from e
+
+    def verify_flight_mode(
+        self,
+        expected_mode: FlightMode,
+        timeout_s: float = 5.0,
+    ) -> None:
+        try:
+            wait_until(
+                lambda: self.telemetry.get_flight_mode() == expected_mode,
+                timeout_s,
+                f"flight mode == {expected_mode.name}",
+            )
+        except TimeoutError as e:
+            current_mode = self.telemetry.get_flight_mode()
+            raise AssertionError(
+                f"Expected flight mode {expected_mode.name}, "
+                f"but current mode is {current_mode.name}"
             ) from e
 
     def wait_for_mission_finished(self, timeout_s: float = 60.0) -> None:
