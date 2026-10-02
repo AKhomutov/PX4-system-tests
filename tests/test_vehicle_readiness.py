@@ -1,0 +1,19 @@
+from __future__ import annotations
+
+from mavsdk.plugins.telemetry import FixType
+
+from vehicle.vehicle import Vehicle
+
+
+def test_vehicle_is_ready_for_flight(vehicle: Vehicle) -> None:
+    vehicle.wait_for_position()
+
+    assert vehicle.telemetry.is_armable()
+    assert vehicle.telemetry.is_local_position_ok()
+    assert vehicle.telemetry.is_global_position_ok()
+    assert vehicle.telemetry.is_home_position_ok()
+    assert vehicle.telemetry.is_accelerometer_calibration_ok()
+    assert vehicle.telemetry.is_gyrometer_calibration_ok()
+    assert vehicle.telemetry.is_magnetometer_calibration_ok()
+    assert vehicle.telemetry.get_gps_fix_type() >= FixType.FIX_3D
+    assert vehicle.telemetry.get_satellites_count() > 0

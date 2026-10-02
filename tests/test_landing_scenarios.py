@@ -11,3 +11,16 @@ def test_landing_reaches_ground_and_disarms(vehicle: Vehicle) -> None:
     vehicle.land()
     vehicle.verify_is_on_ground()
     vehicle.verify_is_disarmed()
+
+
+def test_return_to_launch_lands_and_disarms(vehicle: Vehicle) -> None:
+    vehicle.wait_for_position()
+
+    vehicle.arm()
+    vehicle.take_off()
+    vehicle.verify_altitude_is_above(2.0)
+
+    vehicle.actions.return_to_launch()
+
+    vehicle.verify_is_on_ground()
+    vehicle.verify_is_disarmed()
