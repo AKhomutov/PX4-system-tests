@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from typing import Any
 
 import pytest
 
@@ -11,8 +12,15 @@ from vehicle.telemetry import TelemetryMonitor
 from vehicle.vehicle import Vehicle
 
 
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[Any]) -> Any:
+    outcome = yield
+    report = outcome.get_result()
+    setattr(item, f"rep_{report.when}", report)
+
+
 @pytest.fixture
-def vehicle() -> Iterator[Vehicle]:
+def vehicle(request: pytest.FixtureRequest) -> Iterator[Vehicle]:
     client = VehicleClient()
     client.connect()
     drone = client.get_drone()
@@ -33,5 +41,8 @@ def vehicle() -> Iterator[Vehicle]:
             recovery_error = error
             print(f"Warn: failed to recover vehicle to safe state: {error}")
         telemetry.stop()
-        if recovery_error is not None:
+
+        call_report = getattr(request.node, "rep_call", None)
+        test_failed = call_report is not None and call_report.failed
+        if recovery_error is not None and not test_failed:
             raise recovery_error
