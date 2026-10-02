@@ -1,18 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 import pytest
 
+from tests.support import VehicleDependencies
 from vehicle.actions import VehicleActions
 from vehicle.client import VehicleClient
 from vehicle.telemetry import TelemetryMonitor
-
-
-@dataclass(frozen=True)
-class VehicleDependencies:
-    telemetry: TelemetryMonitor
-    actions: VehicleActions
 
 
 @pytest.fixture

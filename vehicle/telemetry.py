@@ -20,6 +20,11 @@ class TelemetryMonitor:
         self._max_relative_altitude_m: float | None = None
 
     def start(self) -> None:
+        if self._handle is not None:
+            raise RuntimeError("TelemetryMonitor is already started")
+
+        self._max_relative_altitude_m = None
+        self._last_print = 0.0
         self._handle = self._telemetry.subscribe_position(self._on_position)
 
     def stop(self) -> None:

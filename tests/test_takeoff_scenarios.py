@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from tests.conftest import VehicleDependencies
-from tests.takeoff_test import TakeoffTest
+from scenarios.takeoff import TakeoffTest
+from tests.support import VehicleDependencies
 
 
 def test_takeoff_reaches_expected_altitude(
