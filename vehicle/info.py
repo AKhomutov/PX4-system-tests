@@ -1,7 +1,20 @@
 from __future__ import annotations
 
+import time
+from collections.abc import Callable
+from typing import TypeVar
+
 from mavsdk import System
-from mavsdk.plugins.info import Identification, Info, Product, Version
+from mavsdk.plugins.info import (
+    Identification,
+    Info,
+    InfoError,
+    InfoResult,
+    Product,
+    Version,
+)
+
+T = TypeVar("T")
 
 
 class VehicleInfo:
@@ -9,16 +22,16 @@ class VehicleInfo:
         self._info = Info(drone)
 
     def get_identification(self) -> Identification:
-        return self._info.get_identification()
+        return self._wait_for_info(self._info.get_identification)
 
     def get_product(self) -> Product:
-        return self._info.get_product()
+        return self._wait_for_info(self._info.get_product)
 
     def get_version(self) -> Version:
-        return self._info.get_version()
+        return self._wait_for_info(self._info.get_version)
 
     def get_speed_factor(self) -> float:
-        return float(self._info.get_speed_factor())
+        return float(self._wait_for_info(self._info.get_speed_factor))
 
     def get_hardware_uid(self) -> str:
         return str(self.get_identification().hardware_uid)
@@ -48,3 +61,21 @@ class VehicleInfo:
 
     def get_flight_software_git_hash(self) -> str:
         return str(self.get_version().flight_sw_git_hash)
+
+    def _wait_for_info(
+        self,
+        getter: Callable[[], T],
+        timeout_s: float = 5.0,
+    ) -> T:
+        deadline = time.monotonic() + timeout_s
+        while True:
+            try:
+                return getter()
+            except InfoError as error:
+                if error.result != InfoResult.INFORMATION_NOT_RECEIVED_YET:
+                    raise
+                if time.monotonic() >= deadline:
+                    raise TimeoutError(
+                        f"Timed out after {timeout_s}s waiting for vehicle info"
+                    ) from error
+                time.sleep(0.1)
