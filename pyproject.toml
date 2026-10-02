@@ -1,3 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "px4-system-tests"
+version = "0.1.0"
+requires-python = ">=3.14"
+
+dependencies = [
+    "mavsdk==4.0.1",
+    "pytest==9.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy==2.4.0",
+    "ruff==0.16.10",
+]
+
+[tool.setuptools.packages.find]
+include = ["vehicle*", "utils*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py314"

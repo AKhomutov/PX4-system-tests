@@ -102,6 +102,12 @@ This also runs when a test fails.
 
 ## Running
 
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
 Start PX4 SITL with MAVLink available on UDP port `14540`, then run:
 
 ```bash
