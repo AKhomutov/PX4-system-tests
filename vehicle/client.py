@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 from mavsdk import ComponentType, Configuration, Mavsdk, System
 
 DEFAULT_CONNECTION_URL = "udpin://0.0.0.0:14540"
@@ -9,7 +7,8 @@ CONNECTION_URL_ENV = "PX4_CONNECTION_URL"
 
 
 class VehicleClient:
-    def __init__(self) -> None:
+    def __init__(self, connection_url: str = DEFAULT_CONNECTION_URL) -> None:
+        self.connection_url = connection_url
         self.sdk: Mavsdk | None = None
         self.drone: System | None = None
 
@@ -20,8 +19,7 @@ class VehicleClient:
 
         self.sdk = Mavsdk(config)
 
-        connection_url = os.getenv(CONNECTION_URL_ENV, DEFAULT_CONNECTION_URL)
-        self.sdk.add_any_connection(connection_url)
+        self.sdk.add_any_connection(self.connection_url)
 
     def _discover_drone(self) -> None:
         if self.sdk is None:

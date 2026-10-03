@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+instance="${1:-0}"
+
+if ! [[ "$instance" =~ ^[0-9]+$ ]]; then
+  echo "PX4 instance must be a non-negative integer" >&2
+  exit 1
+fi
+
+container_name="px4-gazebo-$instance"
+gz_partition="px4-test-$instance"
+ros_domain_id=$((83 + instance))
+
 umask 077
 
 : "${DISPLAY:?Open a terminal in your local graphical session}"
@@ -18,7 +29,7 @@ if [ ! -s "$auth" ]; then
 fi
 
 docker run --rm -it \
-  --name px4-gazebo \
+  --name "$container_name" \
   --network host \
   --gpus all \
   --mount type=bind,src=/tmp/.X11-unix,dst=/tmp/.X11-unix,readonly \
@@ -27,6 +38,8 @@ docker run --rm -it \
   -e XAUTHORITY=/tmp/px4.xauth \
   -e QT_QPA_PLATFORM=xcb \
   -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics,display \
-  -e ROS_DOMAIN_ID=83 \
+  -e "GZ_PARTITION=$gz_partition" \
+  -e "ROS_DOMAIN_ID=$ros_domain_id" \
   -e PX4_SIM_MODEL=gz_x500 \
-  px4io/px4-sitl-gazebo:latest
+  px4io/px4-sitl-gazebo:latest \
+  -i "$instance"

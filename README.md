@@ -156,6 +156,36 @@ The connection URL can be overridden with:
 PX4_CONNECTION_URL="udpin://0.0.0.0:14541" pytest -v
 ```
 
+## Parallel test execution
+
+Tests run serially by default against PX4 instance `0` on port `14540`.
+
+If you want to run tests in parallel, start one SITL instance per pytest worker:
+
+```bash
+./scripts/run_px4_sitl_nvidia.sh 0
+./scripts/run_px4_sitl_nvidia.sh 1
+```
+
+Then run:
+
+```bash
+pytest -n 2 -v
+```
+
+Workers are mapped to SITL instances automatically:
+
+```text
+gw0 -> 14540
+gw1 -> 14541
+```
+
+So `-n 3` requires three running SITL instances, `0`, `1`, and `2`.
+
+The same works with the AMD and CPU launcher scripts.
+
+QGroundControl can stay running as a single instance and monitor all simulated vehicles.
+
 Static checks:
 
 ```bash

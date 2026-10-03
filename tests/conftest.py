@@ -1,18 +1,31 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator
 from typing import Any
 
 import pytest
 
 from vehicle.actions import VehicleActions
-from vehicle.client import VehicleClient
+from vehicle.client import CONNECTION_URL_ENV, DEFAULT_CONNECTION_URL, VehicleClient
 from vehicle.failures import VehicleFailures
 from vehicle.info import VehicleInfo
 from vehicle.mission import VehicleMission
 from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
 from vehicle.vehicle import Vehicle
+
+
+def get_connection_url(request: pytest.FixtureRequest) -> str:
+    worker_input = getattr(request.config, "workerinput", None)
+    if worker_input is None:
+        return os.getenv(
+            CONNECTION_URL_ENV,
+            DEFAULT_CONNECTION_URL,
+        )
+    worker_id = str(worker_input["workerid"])
+    worker_index = int(worker_id.removeprefix("gw"))
+    return f"udpin://0.0.0.0:{14540 + worker_index}"
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -24,7 +37,7 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[Any]) -> 
 
 @pytest.fixture
 def vehicle(request: pytest.FixtureRequest) -> Iterator[Vehicle]:
-    client = VehicleClient()
+    client = VehicleClient(connection_url=get_connection_url(request))
     client.connect()
     drone = client.get_drone()
 
