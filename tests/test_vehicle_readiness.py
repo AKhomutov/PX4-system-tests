@@ -6,12 +6,8 @@ from vehicle.vehicle import Vehicle
 
 
 def test_vehicle_is_ready_for_flight(vehicle: Vehicle) -> None:
-    vehicle.wait_for_position()
+    vehicle.wait_until_ready_for_flight()
 
-    assert vehicle.telemetry.is_armable()
-    assert vehicle.telemetry.is_local_position_ok()
-    assert vehicle.telemetry.is_global_position_ok()
-    assert vehicle.telemetry.is_home_position_ok()
     assert vehicle.telemetry.is_accelerometer_calibration_ok()
     assert vehicle.telemetry.is_gyrometer_calibration_ok()
     assert vehicle.telemetry.is_magnetometer_calibration_ok()
