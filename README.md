@@ -40,7 +40,7 @@ utils/
 Example:
 
 ```python
-vehicle.wait_for_position()
+vehicle.wait_until_ready_for_flight()
 
 vehicle.arm()
 vehicle.take_off()
@@ -64,6 +64,7 @@ mission_plan = (
     .build()
 )
 
+vehicle.wait_until_ready_for_flight()
 vehicle.mission.upload(mission_plan)
 vehicle.arm()
 vehicle.mission.start()
@@ -185,6 +186,24 @@ So `-n 3` requires three running SITL instances, `0`, `1`, and `2`.
 The same works with the AMD and CPU launcher scripts.
 
 QGroundControl can stay running as a single instance and monitor all simulated vehicles.
+
+## Logging
+
+Pytest captures Python logs during test execution.
+
+Run normally:
+
+```bash
+pytest -v
+```
+
+To see INFO logs live in the console:
+
+```bash
+pytest -v --log-cli-level=INFO
+```
+
+Warnings and errors are also included in pytest output when relevant.
 
 Static checks:
 

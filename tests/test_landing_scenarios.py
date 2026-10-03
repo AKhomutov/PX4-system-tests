@@ -4,7 +4,7 @@ from vehicle.vehicle import Vehicle
 
 
 def test_landing_reaches_ground_and_disarms(vehicle: Vehicle) -> None:
-    vehicle.wait_for_position()
+    vehicle.wait_until_ready_for_flight()
     vehicle.arm()
     vehicle.take_off()
     vehicle.verify_altitude_is_above(2.0)
@@ -14,7 +14,7 @@ def test_landing_reaches_ground_and_disarms(vehicle: Vehicle) -> None:
 
 
 def test_return_to_launch_lands_and_disarms(vehicle: Vehicle) -> None:
-    vehicle.wait_for_position()
+    vehicle.wait_until_ready_for_flight()
 
     vehicle.arm()
     vehicle.take_off()

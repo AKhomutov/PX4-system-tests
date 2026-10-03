@@ -7,7 +7,7 @@ from vehicle.vehicle import Vehicle
 
 
 def test_simple_mission_completes(vehicle: Vehicle) -> None:
-    vehicle.wait_for_position()
+    vehicle.wait_until_ready_for_flight()
 
     latitude = vehicle.telemetry.get_latitude_deg()
     longitude = vehicle.telemetry.get_longitude_deg()
@@ -29,7 +29,7 @@ def test_simple_mission_completes(vehicle: Vehicle) -> None:
 
 
 def test_mission_can_be_paused(vehicle: Vehicle) -> None:
-    vehicle.wait_for_position()
+    vehicle.wait_until_ready_for_flight()
 
     latitude = vehicle.telemetry.get_latitude_deg()
     longitude = vehicle.telemetry.get_longitude_deg()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from collections.abc import Iterator
 from typing import Any
@@ -14,6 +15,8 @@ from vehicle.mission import VehicleMission
 from vehicle.parameters import VehicleParameters
 from vehicle.telemetry import TelemetryMonitor
 from vehicle.vehicle import Vehicle
+
+logger = logging.getLogger(__name__)
 
 
 def get_connection_url(request: pytest.FixtureRequest) -> str:
@@ -65,13 +68,19 @@ def vehicle(request: pytest.FixtureRequest) -> Iterator[Vehicle]:
             connected_vehicle.reset_test_state()
         except Exception as error:
             cleanup_errors.append(error)
-            print(f"Warn: failed to reset vehicle test state: {error}")
+            logger.warning(
+                "Failed to reset vehicle test state: %s",
+                error,
+            )
 
         try:
             telemetry.stop()
         except Exception as error:
             cleanup_errors.append(error)
-            print(f"Warn: failed to stop telemetry: {error}")
+            logger.warning(
+                "Failed to stop telemetry: %s",
+                error,
+            )
 
         call_report = getattr(request.node, "rep_call", None)
         test_failed = call_report is not None and call_report.failed

@@ -47,6 +47,19 @@ class Vehicle:
             "first position telemetry",
         )
 
+    def wait_until_ready_for_flight(self, timeout_s: float = 15.0) -> None:
+        wait_until(
+            lambda: (
+                self.telemetry.has_position()
+                and self.telemetry.is_local_position_ok()
+                and self.telemetry.is_global_position_ok()
+                and self.telemetry.is_home_position_ok()
+                and self.telemetry.is_armable()
+            ),
+            timeout_s,
+            "vehicle to become ready for flight",
+        )
+
     def verify_altitude_is_above(
         self,
         altitude_m: float,
@@ -145,29 +158,36 @@ class Vehicle:
         landing_timeout_s: float = 30.0,
         disarm_timeout_s: float = 10.0,
     ) -> None:
-        if self._is_on_ground():
-            if self._is_armed():
+        if self.telemetry.is_on_ground():
+            if self.telemetry.is_armed():
                 self.disarm()
                 wait_until(
-                    lambda: not self._is_armed(),
+                    lambda: not self.telemetry.is_armed(),
                     disarm_timeout_s,
                     "disarm during recovery",
                 )
             return
 
-        self.land()
-        wait_until(
-            self._is_on_ground,
-            landing_timeout_s,
-            "landing during recovery",
-        )
-
-        if self._is_armed():
-            self.disarm()
+        if self.telemetry.is_in_air():
+            self.land()
             wait_until(
-                lambda: not self._is_armed(),
-                disarm_timeout_s,
-                "disarm during recovery",
+                self.telemetry.is_on_ground,
+                landing_timeout_s,
+                "landing during recovery",
+            )
+
+            if self.telemetry.is_armed():
+                self.disarm()
+                wait_until(
+                    lambda: not self.telemetry.is_armed(),
+                    disarm_timeout_s,
+                    "disarm during recovery",
+                )
+            return
+
+        if self.telemetry.is_armed():
+            raise RuntimeError(
+                "Cannot safely recover vehicle: landed state is unknown while armed"
             )
 
     def reset_test_state(self) -> None:

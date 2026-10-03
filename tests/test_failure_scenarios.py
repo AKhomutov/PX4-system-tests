@@ -44,7 +44,7 @@ def assert_altitude_within_mission_corridor(
 
 
 def test_gps_failure_degrades_global_position_health(vehicle: Vehicle) -> None:
-    vehicle.wait_for_position()
+    vehicle.wait_until_ready_for_flight()
     assert vehicle.telemetry.is_global_position_ok()
 
     vehicle.failures.fail_gps(FailureType.OFF)
@@ -59,7 +59,7 @@ def test_gps_failure_degrades_global_position_health(vehicle: Vehicle) -> None:
 
 
 def test_mission_remains_stable_after_barometer_failure(vehicle: Vehicle) -> None:
-    vehicle.wait_for_position()
+    vehicle.wait_until_ready_for_flight()
 
     latitude = vehicle.telemetry.get_latitude_deg()
     longitude = vehicle.telemetry.get_longitude_deg()

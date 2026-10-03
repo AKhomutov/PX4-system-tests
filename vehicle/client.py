@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import logging
+
 from mavsdk import ComponentType, Configuration, Mavsdk, System
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_CONNECTION_URL = "udpin://0.0.0.0:14540"
 CONNECTION_URL_ENV = "PX4_CONNECTION_URL"
@@ -30,7 +34,7 @@ class VehicleClient:
         if self.drone is None:
             raise RuntimeError("No autopilot found")
 
-        print("PX4 autopilot discovered")
+        logger.info("PX4 autopilot discovered")
 
     def get_drone(self) -> System:
         if self.drone is None:
