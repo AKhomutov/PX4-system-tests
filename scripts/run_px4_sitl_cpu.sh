@@ -11,6 +11,7 @@ fi
 container_name="px4-gazebo-$instance"
 gz_partition="px4-test-$instance"
 ros_domain_id=$((83 + instance))
+IMAGE="${PX4_IMAGE:-px4io/px4-sitl-gazebo:v1.18.0-rc1}"
 
 umask 077
 
@@ -39,5 +40,5 @@ docker run --rm -it \
   -e "GZ_PARTITION=$gz_partition" \
   -e "ROS_DOMAIN_ID=$ros_domain_id" \
   -e PX4_SIM_MODEL=gz_x500 \
-  px4io/px4-sitl-gazebo:latest \
+  "$IMAGE" \
   -i "$instance"
