@@ -146,6 +146,16 @@ pip install -e ".[dev]"
 pytest -v
 ```
 
+By default, tests connect to MAVSDK over:
+
+`udpin://0.0.0.0:14540`
+
+The connection URL can be overridden with:
+
+```bash
+PX4_CONNECTION_URL="udpin://0.0.0.0:14541" pytest -v
+```
+
 Static checks:
 
 ```bash
