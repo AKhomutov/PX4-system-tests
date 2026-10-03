@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Any, Protocol
 
 from mavsdk import System
@@ -11,6 +12,8 @@ from mavsdk.plugins.telemetry import (
     Telemetry,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class PositionLike(Protocol):
     relative_altitude_m: float
@@ -21,12 +24,14 @@ class TelemetryMonitor:
         self._telemetry = Telemetry(drone)
         self._handle: Any | None = None
         self._max_relative_altitude_m: float | None = None
+        self._position_error: object | None = None
 
     def start(self) -> None:
         if self._handle is not None:
             raise RuntimeError("TelemetryMonitor is already started")
 
         self._max_relative_altitude_m = None
+        self._position_error = None
         self._handle = self._telemetry.subscribe_position(self._on_position)
 
     def stop(self) -> None:
@@ -39,11 +44,21 @@ class TelemetryMonitor:
         position: PositionLike,
         error: object | None,
     ) -> None:
+        if error is not None:
+            self._position_error = error
+            logger.warning("Position telemetry subscription error: %s", error)
+            return
+
+        self._position_error = None
+
         if (
             self._max_relative_altitude_m is None
             or position.relative_altitude_m > self._max_relative_altitude_m
         ):
             self._max_relative_altitude_m = position.relative_altitude_m
+
+    def get_position_error(self) -> object | None:
+        return self._position_error
 
     def get_relative_altitude_m(self) -> float:
         return float(self._telemetry.position().relative_altitude_m)
