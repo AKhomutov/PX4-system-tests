@@ -50,6 +50,13 @@ class VehicleFailures:
     ) -> None:
         self.inject(FailureUnit.SYSTEM_MOTOR, failure_type, instance)
 
+    def fail_barometer(
+        self,
+        failure_type: FailureType,
+        instance: int = 0,
+    ) -> None:
+        self.inject(FailureUnit.SENSOR_BARO, failure_type, instance)
+
     def restore_gps(self, instance: int = 0) -> None:
         self.inject(FailureUnit.SENSOR_GPS, FailureType.OK, instance)
 
@@ -61,6 +68,9 @@ class VehicleFailures:
 
     def restore_motor(self, instance: int = 0) -> None:
         self.inject(FailureUnit.SYSTEM_MOTOR, FailureType.OK, instance)
+
+    def restore_barometer(self, instance: int = 0) -> None:
+        self.inject(FailureUnit.SENSOR_BARO, FailureType.OK, instance)
 
     def restore_all(self) -> None:
         errors: list[Exception] = []
