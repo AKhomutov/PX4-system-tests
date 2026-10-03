@@ -11,7 +11,7 @@ fi
 container_name="px4-gazebo-$instance"
 gz_partition="px4-test-$instance"
 ros_domain_id=$((83 + instance))
-IMAGE="${PX4_IMAGE:-px4io/px4-sitl-gazebo:v1.18.0-rc1}"
+IMAGE="${PX4_IMAGE:-px4io/px4-sitl-gazebo@sha256:aa4bbf35f0bd6bdb3269cc96e317c8e78b87f1fc769c734c0818094074e1cc0a}"
 
 umask 077
 

@@ -118,14 +118,12 @@ The NVIDIA version requires Docker with NVIDIA Container Toolkit configured.
 
 The scripts start PX4 SITL with the Gazebo `gz_x500` model and use host networking so MAVSDK can connect over UDP.
 
-By default they use a pinned image:
+The SITL environment is pinned to a specific PX4/Gazebo container image digest for reproducible runs.
 
-`px4io/px4-sitl-gazebo:v1.18.0-rc1`
-
-This is the PX4 version the suite is verified against. Override when needed:
+Override when needed:
 
 ```bash
-PX4_IMAGE=px4io/px4-sitl-gazebo:some-other-tag ./scripts/run_px4_sitl_nvidia.sh
+PX4_IMAGE=px4io/px4-sitl-gazebo:latest ./scripts/run_px4_sitl_nvidia.sh
 ```
 
 > **Note:** The launcher scripts are configured and tested with X11 display forwarding.  
@@ -225,4 +223,4 @@ mypy .
 
 ## Tech stack
 
-Python 3.14, pytest, pytest-xdist, MAVSDK, PX4 SITL (`v1.18.0-rc1`), Gazebo, Ruff and mypy.
+Python 3.14, pytest, pytest-xdist, MAVSDK, PX4 SITL (digest-pinned Gazebo image), Gazebo, Ruff and mypy.
