@@ -14,6 +14,7 @@ Current tests cover:
 - configurable takeoff altitude;
 - mission execution and pause;
 - GPS failure injection;
+- barometer failure during an active mission with altitude/navigation stability checks;
 - vehicle/firmware information.
 
 Tests run against PX4 SITL with Gazebo.
